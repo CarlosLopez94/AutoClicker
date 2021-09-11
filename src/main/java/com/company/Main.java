@@ -30,7 +30,8 @@ public class Main {
         autoClickerFrame.add(view);
 
         autoClickerFrame.setVisible(true);
-        autoClickerFrame.setSize(new Dimension(600, 600));
+        autoClickerFrame.setSize(new Dimension(600, 200));
+        autoClickerFrame.setLocationRelativeTo(null);
         autoClickerFrame.setFocusable(true);
         autoClickerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         autoClickerFrame.setVisible(true);

@@ -6,27 +6,27 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.util.concurrent.Semaphore;
 
-public class AutoClicker extends Thread{
-    private Robot robot;
+public class AutoClicker extends Thread {
+    private final Robot robot;
 
     private final Semaphore semaphore;
-    private Mutex configMutex;
+    private final Mutex configMutex;
     private Integer currentSleepTimeMillis;
     private boolean enabled;
-    private boolean writeLogs;
+    private boolean writeLogsEnable;
     private Point mouseClickPosition;
 
     public AutoClicker() throws AWTException {
-        this(5000, false, true, new Point(200,200));
+        this(5, true, true, new Point(200, 200));
     }
 
-    public AutoClicker(Integer initCurrentSleepTimeMillis, boolean enabled, boolean writeLogs, Point mouseClickPosition) throws AWTException {
+    public AutoClicker(Integer initCurrentSleepTimeMillis, boolean enabled, boolean writeLogsEnable, Point mouseClickPosition) throws AWTException {
         this.robot = new Robot();
-        semaphore = new Semaphore(1);
+        semaphore = new Semaphore(0);
         this.configMutex = new Mutex();
         this.currentSleepTimeMillis = initCurrentSleepTimeMillis;
         this.enabled = enabled;
-        this.writeLogs = writeLogs;
+        this.writeLogsEnable = writeLogsEnable;
         this.mouseClickPosition = mouseClickPosition;
     }
 
@@ -44,6 +44,7 @@ public class AutoClicker extends Thread{
     public void setCurrentSleepTimeMillis(Integer currentSleepTimeMillis) {
         configMutex.lock();
         this.currentSleepTimeMillis = currentSleepTimeMillis;
+        writeLog("SleepTimeMillis: " + currentSleepTimeMillis);
         configMutex.unlock();
     }
 
@@ -57,19 +58,20 @@ public class AutoClicker extends Thread{
     public void setEnabled(boolean enabled) {
         configMutex.lock();
         this.enabled = enabled;
+        writeLog("Enabled: " + enabled);
         configMutex.unlock();
     }
 
-    public boolean isWriteLogs() {
+    public boolean isWriteLogsEnable() {
         configMutex.lock();
-        boolean writeLogsAux= writeLogs;
+        boolean writeLogsAux = writeLogsEnable;
         configMutex.unlock();
         return writeLogsAux;
     }
 
-    public void setWriteLogs(boolean writeLogs) {
+    public void setWriteLogsEnable(boolean writeLogsEnable) {
         configMutex.lock();
-        this.writeLogs = writeLogs;
+        this.writeLogsEnable = writeLogsEnable;
         configMutex.unlock();
     }
 
@@ -83,46 +85,48 @@ public class AutoClicker extends Thread{
     public void setMouseClickPosition(Point mouseClickPosition) {
         configMutex.lock();
         this.mouseClickPosition = mouseClickPosition;
+        writeLog("newPosition: " + mouseClickPosition);
         configMutex.unlock();
     }
 
-    private void writeLog(String log){
-        System.out.println(log);
+    private void writeLog(String log) {
+        if (writeLogsEnable) {
+            System.out.println(log);
+        }
     }
 
-    private void autoclick(){
+    private void autoclick() {
         // Move mouse
         moveMouseToPosition();
 
-        //
-        robot.mousePress(InputEvent.BUTTON1_MASK);
-        robot.mouseRelease(InputEvent.BUTTON1_MASK);
-        System.out.println("Pressed");
+        // Click
+        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+
+        writeLog("Pressed");
     }
 
-    public void moveMouseToPosition(){
+    public void moveMouseToPosition() {
         robot.mouseMove(mouseClickPosition.x, mouseClickPosition.y);
-        System.out.printf("Mouse moved to (%d,%d)%n",mouseClickPosition.x, mouseClickPosition.y);
+        writeLog(String.format("Mouse moved to (%d,%d)", mouseClickPosition.x, mouseClickPosition.y));
     }
 
     @Override
     public void run() {
         System.out.println("AutoClicker Thread started");
-        while(true){
+        while (true) {
             try {
                 // If its not enabled wait for notification
-                if(!isEnabled()){
-                    System.out.println("AutoClicker is disabled");
+                if (!isEnabled()) {
+                    writeLog("AutoClicker is disabled");
                     semaphore.acquire();
-                    System.out.println("AutoClicker is enable");
+                    writeLog("AutoClicker is enable");
                 }
-
-                // Wait for next click
-                Thread.sleep(getCurrentSleepTimeMillis());
 
                 autoclick();
 
-
+                // Wait for next click
+                Thread.sleep(getCurrentSleepTimeMillis() * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

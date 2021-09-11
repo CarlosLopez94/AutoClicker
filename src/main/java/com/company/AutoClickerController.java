@@ -1,26 +1,39 @@
 package com.company;
 
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.AWTEventListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.concurrent.Semaphore;
 
-public class AutoClickerController implements ActionListener, AWTEventListener {
+public class AutoClickerController implements ActionListener, ChangeListener, ItemListener, AWTEventListener {
+    public static final String NEW_POSITION_BUTTON = "NEW_POSITION_BUTTON";
+
     private Semaphore autoClickerSemaphore;
 
-    private AutoClicker autoClicker;
-    private AutoClickerView autoClickerView;
+    private final AutoClicker autoClicker;
+    private final AutoClickerView autoClickerView;
+
+    private boolean waitingNewPosition;
 
     public AutoClickerController(AutoClicker autoClicker, AutoClickerView autoClickerView) {
         this.autoClicker = autoClicker;
         this.autoClickerView = autoClickerView;
+
+        waitingNewPosition = false;
     }
 
-
     public void start() {
+        // Default values
+        Integer currentSleepTimeMillis = autoClicker.getCurrentSleepTimeMillis();
+        boolean autoClickEnable = autoClicker.isEnabled();
+        Point currentMouseClickPosition  = autoClicker.getMouseClickPosition();
+
+        autoClickerView.initDefaultValues(currentSleepTimeMillis, autoClickEnable, currentMouseClickPosition);
+
         // Bind controller to view
-        autoClickerView.addActionListener(this);
+        autoClickerView.addListeners(this, this, this);
 
         // Start autoClicker
         autoClickerSemaphore = autoClicker.getSemaphore();
@@ -28,17 +41,44 @@ public class AutoClickerController implements ActionListener, AWTEventListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        switch(e.getActionCommand()){
-            case "BOTON":
-                autoClickerSemaphore.release();
-                break;
+    public void stateChanged(ChangeEvent e) {
+       if(e.getSource() instanceof JSpinner){
+            // Get value
+            Integer newValue = autoClickerView.getCurrentSleepTime();
+            // Update model
+            autoClicker.setCurrentSleepTimeMillis(newValue);
         }
     }
 
     @Override
+    public void itemStateChanged(ItemEvent e) {
+        // Check new state is selected
+        autoClicker.setEnabled(e.getStateChange() == ItemEvent.SELECTED);
+    }
+
+    @Override
     public void eventDispatched(AWTEvent event) {
-        System.out.print(MouseInfo.getPointerInfo().getLocation() + " | ");
-        System.out.println(event);
+        if (waitingNewPosition && event.paramString().contains("FOCUS_LOST")) {
+            waitingNewPosition = false;
+
+            Point newMousePosition = MouseInfo.getPointerInfo().getLocation();
+            autoClicker.setMouseClickPosition(newMousePosition);
+            autoClickerView.updatePosition(newMousePosition);
+
+            autoClicker.setEnabled(true);
+            autoClickerView.setCheckboxSelectedState(true, true);
+
+            autoClickerSemaphore.release();
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (NEW_POSITION_BUTTON.equals(e.getActionCommand())) {
+            autoClicker.setEnabled(false);
+
+            autoClickerView.setCheckboxSelectedState(false, false);
+            waitingNewPosition = true;
+        }
     }
 }
