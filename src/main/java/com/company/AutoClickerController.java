@@ -1,5 +1,10 @@
 package com.company;
 
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -7,7 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.concurrent.Semaphore;
 
-public class AutoClickerController implements ActionListener, ChangeListener, ItemListener, AWTEventListener {
+public class AutoClickerController implements ActionListener, ChangeListener, ItemListener, AWTEventListener, NativeKeyListener {
     public static final String NEW_POSITION_BUTTON = "NEW_POSITION_BUTTON";
 
     private Semaphore autoClickerSemaphore;
@@ -71,6 +76,25 @@ public class AutoClickerController implements ActionListener, ChangeListener, It
             autoClickerSemaphore.release();
         }
     }
+
+    public void nativeKeyPressed(NativeKeyEvent e) {
+        System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+
+        if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
+            try {
+                GlobalScreen.unregisterNativeHook();
+            } catch (NativeHookException nativeHookException) {
+                nativeHookException.printStackTrace();
+            }
+        }else if(e.getKeyCode() == NativeKeyEvent.VC_P){
+            autoClicker.setEnabled(false);
+            autoClickerView.setCheckboxSelectedState(false, true);
+        }
+    }
+
+    public void nativeKeyReleased(NativeKeyEvent e) {}
+
+    public void nativeKeyTyped(NativeKeyEvent e) {}
 
     @Override
     public void actionPerformed(ActionEvent e) {

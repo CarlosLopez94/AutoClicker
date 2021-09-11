@@ -17,7 +17,7 @@ public class AutoClicker extends Thread {
     private Point mouseClickPosition;
 
     public AutoClicker() throws AWTException {
-        this(5, true, true, new Point(200, 200));
+        this(5, true, true, new Point(230, 340));
     }
 
     public AutoClicker(Integer initCurrentSleepTimeMillis, boolean enabled, boolean writeLogsEnable, Point mouseClickPosition) throws AWTException {
