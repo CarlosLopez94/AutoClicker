@@ -78,7 +78,7 @@ public class AutoClickerController implements ActionListener, ChangeListener, It
     }
 
     public void nativeKeyPressed(NativeKeyEvent e) {
-        System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+        //System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
 
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
@@ -87,6 +87,7 @@ public class AutoClickerController implements ActionListener, ChangeListener, It
                 nativeHookException.printStackTrace();
             }
         }else if(e.getKeyCode() == NativeKeyEvent.VC_P){
+            System.out.println("Key 'P' Pressed");
             autoClicker.setEnabled(false);
             autoClickerView.setCheckboxSelectedState(false, true);
         }
