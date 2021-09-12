@@ -17,7 +17,7 @@ public class AutoClicker extends Thread {
     private Point mouseClickPosition;
 
     public AutoClicker() throws AWTException {
-        this(5, true, true, new Point(230, 340));
+        this(2000, true, true, new Point(230, 340));
     }
 
     public AutoClicker(Integer initCurrentSleepTimeMillis, boolean enabled, boolean writeLogsEnable, Point mouseClickPosition) throws AWTException {
@@ -126,7 +126,7 @@ public class AutoClicker extends Thread {
                 autoclick();
 
                 // Wait for next click
-                Thread.sleep(getCurrentSleepTimeMillis() * 1000);
+                Thread.sleep(getCurrentSleepTimeMillis());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

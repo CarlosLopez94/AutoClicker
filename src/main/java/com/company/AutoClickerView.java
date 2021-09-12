@@ -14,7 +14,7 @@ public class AutoClickerView extends JPanel {
     private final JLabel newPositionLabel;
 
     public AutoClickerView() {
-        sleepTimeSpinner = new JSpinner();
+        sleepTimeSpinner = new JSpinner(new SpinnerNumberModel(10, 10, 5000, 100));
         checkBoxClickerEnable=new JCheckBox("AutoClicker Activado");
         newPositionButton = new JButton("Cambiar posición de autoclick");
         newPositionLabel = new JLabel();
