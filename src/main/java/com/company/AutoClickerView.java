@@ -17,11 +17,11 @@ public class AutoClickerView extends JPanel {
         sleepTimeSpinner = new JSpinner(new SpinnerNumberModel(10, 10, 5000, 100));
         checkBoxClickerEnable=new JCheckBox("AutoClicker Activado");
         newPositionButton = new JButton("Cambiar posición de autoclick");
-        newPositionLabel = new JLabel();
+        newPositionLabel = new JLabel("", SwingConstants.CENTER);
 
         JPanel centerGrid = new JPanel(new GridLayout(0, 2));
         // First row on centerGrid
-        centerGrid.add(new JLabel("Tiempo de espera entre clicks: "));
+        centerGrid.add(new JLabel("Tiempo de espera entre clicks: ", SwingConstants.CENTER));
         centerGrid.add(sleepTimeSpinner);
 
         // Seconds row on centerGrid
@@ -35,7 +35,7 @@ public class AutoClickerView extends JPanel {
         // BorderLayour
         BorderLayout mainBorderLayout = new BorderLayout();
         setLayout(mainBorderLayout);
-        add(new JLabel("AutoClicker Config"), BorderLayout.NORTH);
+        add(new JLabel("AutoClicker Config", SwingConstants.CENTER), BorderLayout.NORTH);
         add(centerGrid, BorderLayout.CENTER);
 
     }
